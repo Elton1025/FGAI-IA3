@@ -2,8 +2,10 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 *.pyc
-data/
-checkpoints/
+data/raw/
+checkpoints/*
+!checkpoints/README.md
+!checkpoints/manifest.json
 outputs/
 *_FGAI_Assignment3.docx
 agnets.md

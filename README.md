@@ -6,7 +6,7 @@ ICT4403 Foundations of Generative AI, Assignment 3 asks for a comparison of enco
 
 ## Dataset and preparation
 
-The source is [OPUS Books English French](https://huggingface.co/datasets/Helsinki-NLP/opus_books/tree/main/en-fr), an aligned literary corpus hosted by Helsinki NLP. The dataset card permits personal, educational, and research use and restricts commercial redistribution. The original corpus and full processed split are therefore kept outside Git; the preparation script downloads them on demand. The [Kaggle preprocessing run](https://www.kaggle.com/code/eltonlewis/ict4403-english-french-data-preparation) saved the reusable split files in its version 2 output.
+The source is [OPUS Books English French](https://huggingface.co/datasets/Helsinki-NLP/opus_books/tree/main/en-fr), an aligned literary corpus hosted by Helsinki NLP. The dataset card permits personal, educational, and research use and restricts commercial redistribution. The original corpus is not copied into Git. The exact 4,400-pair processed subset is included in `data/processed/` with attribution in `data/README.md`. The [Kaggle preprocessing run](https://www.kaggle.com/code/eltonlewis/ict4403-english-french-data-preparation) saved the same split files in its version 2 output.
 
 The script normalizes Unicode to NFKC, collapses whitespace, removes very short or long pairs and extreme length ratios, and keeps the first translation for each casefolded English source. A seeded shuffle (4403) then selects 4,400 pairs and partitions them into 4,000 training, 200 validation, and 200 test examples. This prevents identical English source strings from crossing the splits. The Kaggle run reported 127,085 raw rows, 117,720 clean unique rows, and the stated split sizes. See `src/prepare_data.py` for the exact filters.
 
@@ -23,7 +23,7 @@ Meta LLaMA 3.2 1B Instruct and Google's original Gemma 3 270M IT both returned H
 
 ## Dependencies and execution steps
 
-Use Python 3.10 or newer with a CUDA GPU. `requirements.txt` lists PyTorch, Transformers, Datasets, SentencePiece, SacreBLEU, Accelerate, pandas, and Matplotlib. Install it, then run the following commands in Bash:
+Use Python 3.10 or newer with a CUDA GPU. `requirements.txt` lists PyTorch, Transformers, Datasets, SentencePiece, SacreBLEU, Accelerate, pandas, and Matplotlib. Install it, then run the following commands in Bash. The preparation command regenerates the included deterministic split and can be skipped if you use `data/processed/` directly:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -44,6 +44,12 @@ python -m src.evaluate \
 ```
 
 The Kaggle MCP batch notebook API did not attach a prior notebook's output to `/kaggle/input`. Each training notebook therefore prepares the deterministic split from the same source and seed. The evaluation code checks exact row IDs and references before comparing predictions. Kaggle model run links are recorded in the results section.
+
+## Executed notebooks and checkpoints
+
+`notebooks/01_preprocess.ipynb` through `notebooks/05_gemma_1b.ipynb` contain the saved Kaggle script source and execution logs for the five completed phases. They were assembled from the Kaggle MCP source and run log because the Kaggle runs were saved as Python scripts. `notebooks/06_evaluation.ipynb` displays the verified local result files and plots with executed outputs. These copies let an evaluator inspect the run evidence even if the original Kaggle notebooks remain private.
+
+The trained weights and tokenizers are published as public Kaggle model variations: [basic Transformer](https://www.kaggle.com/models/eltonlewis/ict4403-en-fr-translation-checkpoints/PyTorch/basic-transformer) and [fine tuned mT5](https://www.kaggle.com/models/eltonlewis/ict4403-en-fr-translation-checkpoints/PyTorch/mt5-small-finetuned). The mT5 weights are 1.20 GB, above GitHub's ordinary 100 MB per-file limit, so the repository includes download instructions and SHA-256 hashes in `checkpoints/README.md` and `checkpoints/manifest.json`. Downloading these published checkpoints avoids repeating training. The pretrained TinyLlama and Gemma weights are linked in the model table above; no adapted weights were created for the prompted decoders.
 
 ## Results obtained
 
@@ -85,4 +91,4 @@ Gemma 3 1B IT is the best-performing model in this experiment because it has the
 
 `YourName_RegNum_FGAI_Assignment3.docx` is a separate submission sheet with placeholders. It is intentionally ignored by Git. Replace the placeholders and add your GitHub URL after publishing the repository.
 
-The workspace's `.git` directory was read only during this run, so verified source and result commits were recorded in `repo-history/`, a separate local Git directory excluded from the project contents. There is no GitHub remote, and the repository has not been pushed. To publish while retaining these commits, configure your remote with `git --git-dir=repo-history --work-tree=. remote add origin <your-repository-url>` and push with `git --git-dir=repo-history --work-tree=. push -u origin main`. The Kaggle notebooks are private by default; grant evaluator access or publish copies if you want their links to be directly viewable.
+The workspace's `.git` directory was read only during the original implementation, so commits were recorded in `repo-history/`, a separate local Git directory excluded from the project contents. That history has the GitHub `origin` remote configured. Use `git --git-dir=repo-history --work-tree=. push origin main` to publish later commits from this workspace. The original Kaggle notebooks are private; their source and execution logs are preserved in the repository notebooks above.
