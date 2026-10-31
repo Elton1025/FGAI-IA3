@@ -65,6 +65,33 @@ def evaluate(prediction_paths, metric_paths, output):
     return rows
 
 
+def evaluate_temperature(greedy_paths, sampled_paths, output):
+    """Compare decoding on the same first 30 test items for each decoder."""
+    output = Path(output)
+    output.mkdir(parents=True, exist_ok=True)
+    rows = []
+    samples = []
+    for name, sampled_path in sampled_paths.items():
+        sampled = load_jsonl(sampled_path)
+        greedy = load_jsonl(greedy_paths[name])[:len(sampled)]
+        if [r["id"] for r in sampled] != [r["id"] for r in greedy]:
+            raise ValueError(f"Temperature sample IDs differ for {name}")
+        refs = [r["fr"] for r in sampled]
+        for label, items in (("greedy", greedy), ("temperature_0.7", sampled)):
+            pred = [r["prediction"] for r in items]
+            rows.append({"model": name, "decoding": label, "n": len(items),
+                         "bleu": sacrebleu.corpus_bleu(pred, [refs]).score,
+                         "chrf": sacrebleu.corpus_chrf(pred, [refs]).score})
+        for base, alt in zip(greedy[:5], sampled[:5]):
+            samples.append({"model": name, "id": base["id"], "source": base["en"],
+                            "reference": base["fr"], "greedy": base["prediction"],
+                            "temperature_0.7": alt["prediction"]})
+    (output / "temperature_scores.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    (output / "temperature_samples.json").write_text(
+        json.dumps(samples, ensure_ascii=False, indent=2), encoding="utf-8")
+    return rows
+
+
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--prediction", action="append", required=True,
