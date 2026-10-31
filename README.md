@@ -12,12 +12,12 @@ The script normalizes Unicode to NFKC, collapses whitespace, removes very short 
 
 ## Models implemented
 
-| System | Architecture | Adaptation | Checkpoint |
-|---|---|---|---|
-| Basic Transformer | encoder decoder | trained from scratch, shared 4,000 piece BPE | local 2 layer model |
-| mT5 | encoder decoder | full fine tuning, one epoch | [google/mt5-small](https://huggingface.co/google/mt5-small) |
-| TinyLlama | decoder only LLaMA architecture | three shot prompting, no weight updates | [TinyLlama 1.1B Chat](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) |
-| Gemma | decoder only | three shot prompting, no weight updates | [Unsloth Gemma 3 1B IT](https://huggingface.co/unsloth/gemma-3-1b-it) |
+| System            | Architecture                    | Adaptation                                   | Checkpoint                                                                       |
+| ----------------- | ------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------- |
+| Basic Transformer | encoder decoder                 | trained from scratch, shared 4,000 piece BPE | local 2 layer model                                                              |
+| mT5               | encoder decoder                 | full fine tuning, one epoch                  | [google/mt5-small](https://huggingface.co/google/mt5-small)                      |
+| TinyLlama         | decoder only LLaMA architecture | three shot prompting, no weight updates      | [TinyLlama 1.1B Chat](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) |
+| Gemma             | decoder only                    | three shot prompting, no weight updates      | [Unsloth Gemma 3 1B IT](https://huggingface.co/unsloth/gemma-3-1b-it)            |
 
 Meta LLaMA 3.2 1B Instruct and Google's original Gemma 3 270M IT both returned HTTP 401 in Kaggle because their weights require access and authentication. TinyLlama shares LLaMA 2 architecture and tokenizer; the Unsloth Gemma checkpoint is a hosted copy of Gemma 3 1B IT. These exact substitutions are named in the measured results. An initial Gemma 270M run produced empty decoded translations; its diagnostic scores and samples are retained separately in `results/`.
 
@@ -55,12 +55,12 @@ The trained weights and tokenizers are published as public Kaggle model variatio
 
 The following values are from completed Kaggle Tesla T4 runs and the [final evaluation notebook, version 2](https://www.kaggle.com/code/eltonlewis/ict4403-final-translation-evaluation). The notebook checked the IDs and references of all 200 examples before computing corpus scores. Machine readable results and ten paired examples are in `results/scores.json` and `results/samples.json`. Full predictions retrieved from the Kaggle outputs are in `results/predictions/`, and the 30-example sampled outputs are in `results/temperature_predictions/`. The plots in `results/` were regenerated locally from the verified scores with `python -m src.plot_results`.
 
-| Model | Parameters | Train time | Inference time for 200 examples | BLEU | chrF |
-|---|---:|---:|---:|---:|---:|
-| Basic Transformer | 4,729,760 | 12.89 s | 5.79 s | 0.42 | 9.50 |
-| mT5 small | 300,176,768 | 185.56 s | 33.47 s | 4.63 | 23.24 |
-| TinyLlama 1.1B Chat | 1,100,048,384 | none | 674.44 s | 1.83 | 23.55 |
-| Gemma 3 1B IT | 999,885,952 | none | 417.71 s | **14.11** | **42.83** |
+| Model               |    Parameters | Train time | Inference time for 200 examples |      BLEU |      chrF |
+| ------------------- | ------------: | ---------: | ------------------------------: | --------: | --------: |
+| Basic Transformer   |     4,729,760 |    12.89 s |                          5.79 s |      0.42 |      9.50 |
+| mT5 small           |   300,176,768 |   185.56 s |                         33.47 s |      4.63 |     23.24 |
+| TinyLlama 1.1B Chat | 1,100,048,384 |       none |                        674.44 s |      1.83 |     23.55 |
+| Gemma 3 1B IT       |   999,885,952 |       none |                        417.71 s | **14.11** | **42.83** |
 
 - [Basic Transformer Kaggle run](https://www.kaggle.com/code/eltonlewis/ict4403-basic-transformer-english-french), version 3. Five epochs; validation loss fell from 6.27 to 5.38. The output contains `model.pt`, the BPE tokenizer, predictions, and metrics.
 - [mT5 Kaggle run](https://www.kaggle.com/code/eltonlewis/ict4403-mt5-english-french), version 3. One epoch; training loss 5.44 and validation loss 2.78. The output contains the fine tuned checkpoint, predictions, and metrics.
@@ -86,9 +86,3 @@ Before deployment, evaluate stratified examples for gender, dialect, named entit
 ## Conclusion
 
 Gemma 3 1B IT is the best-performing model in this experiment because it has the highest BLEU and chrF scores on the shared 200-example test set. It requires far more parameters and inference time than the small Transformer and was evaluated with prompting rather than task-specific fine tuning, so the result should be interpreted as a comparison of these complete systems.
-
-## Submission note
-
-`YourName_RegNum_FGAI_Assignment3.docx` is a separate submission sheet with placeholders. It is intentionally ignored by Git. Replace the placeholders and add your GitHub URL after publishing the repository.
-
-The workspace's `.git` directory was read only during the original implementation, so commits were recorded in `repo-history/`, a separate local Git directory excluded from the project contents. That history has the GitHub `origin` remote configured. Use `git --git-dir=repo-history --work-tree=. push origin main` to publish later commits from this workspace. The original Kaggle notebooks are private; their source and execution logs are preserved in the repository notebooks above.
