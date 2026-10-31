@@ -1,0 +1,12 @@
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+*.pyc
+data/
+checkpoints/
+outputs/
+*_FGAI_Assignment3.docx
+agnets.md
+agents.md
+repo-history/
+!results/.gitkeep
